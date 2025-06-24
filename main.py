@@ -29,6 +29,12 @@ class Object(Turtle):
         self.goto(x_start,y_start)
         self.pendown()
 
+class Player(Object):
+    # Опис
+    def __init__(self, color="green", form="circle", x_start=0, y_start=-350):
+        super().__init__(color, form, x_start, y_start)
+        self.lestening()
+    # Рух після натисканеня клавіш
     def move(self, direct):
         lab = 5
         if direct == "Left":
@@ -40,17 +46,86 @@ class Object(Turtle):
         elif direct == "Down":
             self.sety(self.ycor()-lab) 
         update()
-
+    # Детект натискання клавіш
     def lestening(self):
-        screen.onkeypress(lambda: box.move("Left"), "Left")
-        screen.onkeypress(lambda: box.move("Right"), "Right")
-        screen.onkeypress(lambda: box.move("Up"), "Up")
-        screen.onkeypress(lambda: box.move("Down"), "Down")
+        # Стрілки
+        screen.onkeypress(lambda: self.move("Left"), "Left")
+        screen.onkeypress(lambda: self.move("Right"), "Right")
+        screen.onkeypress(lambda: self.move("Up"), "Up")
+        screen.onkeypress(lambda: self.move("Down"), "Down")
+        # WSAD
+        screen.onkeypress(lambda: self.move("Left"), "A")
+        screen.onkeypress(lambda: self.move("Right"), "D")
+        screen.onkeypress(lambda: self.move("Up"), "W")
+        screen.onkeypress(lambda: self.move("Down"), "S")
+        # wasd
 
+        screen.onkeypress(lambda: self.move("Left"), "a")
+        screen.onkeypress(lambda: self.move("Right"), "d")
+        screen.onkeypress(lambda: self.move("Up"), "w")
+        screen.onkeypress(lambda: self.move("Down"), "s")
+        screen.listen()
 
-box = Object("green","circle")
-box.lestening()
+class Point(Object):
+    # Опис
+    def __init__(self, color="orange", form="square", x_start=0, y_start=350):
+        super().__init__(color, form, x_start, y_start)        
 
+    # Реєстрація точки евакуації
+    def detect(self):
+        if player.xcor() == point.xcor() and player.ycor() == point.ycor():
+            for i in range(5):
+                print("detected")
+        ontimer(self.detect,50)
+            
+class Barier(Object):
+    # Опис
+    def __init__(self, color="red", form="circle", x_start=0, y_start=0):
+        super().__init__(color, form, x_start, y_start)
 
+    # створення бар'єру 
+    def draw_barier(self,x1,y1,x2,y2):
+        # створення
+        self.begin_fill()
+        self.goto(x1,y1)
+        self.goto(x2,y1)
+        self.goto(x2,y2)
+        self.goto(x1,y2)
+        self.goto(x1,y1)
+        self.end_fill()
+        self.hideturtle()
+        # оголошення кординат для класу
+        self.x1=x1
+        self.x2=x2
+        self.y1=y1
+        self.y2=y2
 
+    # Реєстрація зони смерті
+    def detect(self):
+        if int(player.xcor()) in range(self.x1-5,self.x2+7) and int(player.ycor()) in range(self.y2-5,self.y1+7):
+            for i in range(5):
+                print("barier detected")
+        update()
+        ontimer(self.detect,50)
+
+class Enemy(Object):
+    def __init__(self, color="red", form="circle", x_start=450, y_start=150):
+        super().__init__(color, form, x_start, y_start)
+
+    def detect(self):
+        if abs(player.xcor() - self.xcor()) < 20 and abs(player.ycor() - self.ycor()) < 27:
+            for i in range(5):
+                print("dt")
+        ontimer(self.detect, 50)
+
+        
+k = Enemy()
+barier = Barier()
+point = Point()
+player = Player()
+k.detect()
+barier.draw_barier(-400,100,400,-100)
+barier.detect()
+point.detect()
+update()
 done()
