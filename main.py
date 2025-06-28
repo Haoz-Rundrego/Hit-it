@@ -12,13 +12,12 @@ def config():
     screen.setup(width=1200, height=800, startx=0, starty=0) #задає розмір екрану
     screen.cv._rootwindow.resizable(False, False) 
 config()
-
 # додаткові ресурси
 class Runnum():
     def rnum(self,x,y):
         return randint(x,y)   
 run = Runnum()
-
+score = 0
 # КЛАСИ _________________________________________________________
 class Object(Turtle):
     def __init__(self,color,form,x_start=0,y_start=0):
@@ -28,6 +27,15 @@ class Object(Turtle):
         self.penup()
         self.goto(x_start,y_start)
         self.pendown()
+
+    def deth(self):
+        global score
+        global table
+        screen.clear()
+        table.clear()
+        config()
+        score +=1
+        lvl()
 
 class Player(Object):
     # Опис
@@ -103,29 +111,47 @@ class Barier(Object):
     # Реєстрація зони смерті
     def detect(self):
         if int(player.xcor()) in range(self.x1-5,self.x2+7) and int(player.ycor()) in range(self.y2-5,self.y1+7):
-            for i in range(5):
-                print("barier detected")
+            self.deth()
         update()
         ontimer(self.detect,50)
 
 class Enemy(Object):
     def __init__(self, color="red", form="circle", x_start=450, y_start=150):
         super().__init__(color, form, x_start, y_start)
-
+        self.mov_cor = []
     def detect(self):
-        if abs(player.xcor() - self.xcor()) < 20 and abs(player.ycor() - self.ycor()) < 27:
-            for i in range(5):
-                print("dt")
-        ontimer(self.detect, 50)
+        if int(player.xcor()) in range(self.xcor()-17,self.xcor()+17) and int(player.ycor()) in range(self.ycor()-17,self.ycor()+17):
+            self.deth()
+        update()
+        ontimer(self.detect,50)
 
-        
-k = Enemy()
-barier = Barier()
-point = Point()
-player = Player()
-k.detect()
-barier.draw_barier(-400,100,400,-100)
-barier.detect()
-point.detect()
-update()
+
+def leble():
+    global table
+    table = Turtle()
+    table.hideturtle()
+    table.penup()
+    table.goto(-500,350)
+    table.write(f"Death:{score}", move=False, align='left', font=('Arial', 24, 'normal')) 
+
+def lvl():
+    config()
+    leble()
+
+    global enemy
+    global barier
+    global point
+    global player
+
+    enemy= Enemy()
+    barier = Barier()
+    point = Point()
+    player = Player()
+    enemy.detect()
+    barier.draw_barier(-400,100,400,-100)
+    barier.detect()
+    point.detect()
+    
+    update()
+lvl()
 done()
